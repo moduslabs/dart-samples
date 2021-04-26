@@ -1,0 +1,18 @@
+name: mqtt
+description: MQTT class
+version: 1.0.0
+# homepage: https://www.example.com
+
+environment:
+  sdk: '>=2.10.0 <3.0.0'
+
+dependencies:
+  mqtt_client: ^9.2.0
+  StatefulEmitter:
+    path: ../StatefulEmitter
+  debug:
+    path: ../debug
+#  path: ^1.7.0
+
+dev_dependencies:
+  pedantic: ^1.11.0
