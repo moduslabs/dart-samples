@@ -1,13 +1,7 @@
-/*
- * Package : mqtt_client
- * Author : S. Hamblett <steve.hamblett@linux.com>
- * Date   : 31/05/2017
- * Copyright :  S.Hamblett
- */
-
-import 'package:test/MQTT.dart';
-import 'package:test/debug.dart';
-
+// @dart=2.9
+import 'package:mqtt/MQTT.dart';
+// import 'package:test/debug.dart';
+import 'package:debug/debug.dart';
 final debug = Debug('main');
 
 Future<void> asyncSleep(int seconds) =>
