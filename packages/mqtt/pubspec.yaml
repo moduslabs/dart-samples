@@ -8,10 +8,13 @@ environment:
 
 dependencies:
   mqtt_client: ^9.2.0
+  ansicolor: ^2.0.1
   StatefulEmitter:
     path: ../StatefulEmitter
   debug:
     path: ../debug
+  JSON:
+    path: ../JSON
 #  path: ^1.7.0
 
 dev_dependencies:

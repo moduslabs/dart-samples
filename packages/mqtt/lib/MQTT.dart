@@ -1,20 +1,24 @@
 library mqtt;
 
 import 'dart:collection';
-import 'dart:convert';
+import 'dart:math';
 import 'dart:io';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:debug/debug.dart';
+import 'package:ansicolor/ansicolor.dart';
+import 'package:JSON/JSON.dart';
 import 'package:StatefulEmitter/StatefulEmitter.dart';
 
 typedef Callback = void Function(String topic, String message);
 
 const KEEP_ALIVE = 20;
 
-final debug = Debug('MQTT');
-
 class Mqtt extends StatefulEmitter {
+  final debug = Debug('MQTT');
+  final AnsiPen pen = AnsiPen(),
+      redPen = AnsiPen(),
+  bluePen = AnsiPen();
   var client;
   var broker;
 
@@ -37,13 +41,13 @@ class Mqtt extends StatefulEmitter {
     final connMess = MqttConnectMessage()
         .withClientIdentifier('Mqtt_MyClientUniqueId')
         .keepAliveFor(
-            KEEP_ALIVE) // Must agree with the keep alive set above or not set
+        KEEP_ALIVE) // Must agree with the keep alive set above or not set
         .withWillTopic(
-            'willtopic') // If you set this you must set a will message
+        'willtopic') // If you set this you must set a will message
         .withWillMessage('My Will message')
         .startClean() // Non persistent session for testing
         .withWillQos(MqttQos.atLeastOnce);
-    debug('Mqtt::Mosquitto client connecting....');
+    debug('Mosquitto client connecting....');
     client.connectionMessage = connMess;
 
     /// Connect the client, any errors here are communicated by raising of the appropriate exception. Note
@@ -53,21 +57,22 @@ class Mqtt extends StatefulEmitter {
       await client.connect();
     } on NoConnectionException catch (e) {
       // Raised by the client when connection fails.
-      debug('Mqtt::client exception - $e');
+      debug('client exception - $e');
       client.disconnect();
     } on SocketException catch (e) {
       // Raised by the socket layer
-      debug('Mqtt::socket exception - $e');
+      debug('socket exception - $e');
       client.disconnect();
     }
 
     /// Check we are connected
     if (client.connectionStatus?.state == MqttConnectionState.connected) {
-      debug('Mqtt::Mosquitto client connected');
+      debug('Mosquitto client connected');
     } else {
       /// Use status here rather than state if you also want the broker return code.
       debug(
-          'Mqtt::ERROR Mosquitto client connection failed - disconnecting, status is ${client.connectionStatus}');
+          'ERROR Mosquitto client connection failed - disconnecting, status is ${client
+              .connectionStatus}');
       client.disconnect();
       exit(-1);
     }
@@ -77,9 +82,10 @@ class Mqtt extends StatefulEmitter {
     client.updates?.listen((List<MqttReceivedMessage<MqttMessage>> c) {
       final recMess = c[0].payload as MqttPublishMessage;
       final pt =
-          MqttPublishPayload?.bytesToStringAsString(recMess?.payload?.message);
+      MqttPublishPayload?.bytesToStringAsString(recMess?.payload?.message);
       final topic = c[0].topic;
 
+      debug('message <<< $topic $pt');
 //      debug('received $topic $pt');
       var l = subscriptions[topic];
       if (l != null) {
@@ -98,13 +104,37 @@ class Mqtt extends StatefulEmitter {
     });
   }
 
-  void publish(String topic, Map<String, dynamic>message, {bool retain = true}) {
-    if (message is String) {
-      client.publishMessage(topic, retain ? MqttQos.atLeastOnce : MqttQos.atMostOnce, message);
-    }
-    else {
-      final jsonEncoder = JsonEncoder();
-      client.publishMessage(topic, retain ? MqttQos.atLeastOnce : MqttQos.atMostOnce, jsonEncoder.convert(message));
+  int Now() {
+    var n = DateTime.now().millisecondsSinceEpoch;
+    return n;
+  }
+
+  Future<void> publish(String topic, message, {bool retain = true}) async {
+    try {
+      final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
+      final String s = message is String ? message : JSON.stringify(message);
+      final MqttQos r = retain ? MqttQos.atLeastOnce : MqttQos.atMostOnce;
+
+      builder.addString(s);
+
+      ansiColorDisabled = false;
+
+      pen
+        ..reset()
+        ..white(bold: true);
+      redPen
+        ..reset()
+        ..red(bold: true);
+      bluePen
+        ..reset()
+        ..blue(bold: true);
+
+      // pen.black(bold: true)(
+      final hl = s.substring(0, min(s.length, 40));
+      print('${Now()} message ${pen('>>>')} ${redPen(topic)} ${bluePen(hl)}');
+      // debug('message >>> $topic ${s.substring(0, min(s.length, 40))}');
+      return client.publishMessage(topic, r, builder.payload);} catch (e, st) {
+    print('publish ($topic, $message) exception $e $st');
     }
   }
 
@@ -137,28 +167,29 @@ class Mqtt extends StatefulEmitter {
 
   /// The subscribed callback
   void onSubscribed(String topic) {
-    debug('Mqtt::Subscription confirmed for topic $topic');
+    debug('subscribe $topic');
   }
 
   /// The unsolicited disconnect callback
   void onDisconnected() {
-    debug('Mqtt::OnDisconnected client callback - Client disconnection');
+    debug('OnDisconnected client callback - Client disconnection');
     if (client.connectionStatus?.disconnectionOrigin ==
         MqttDisconnectionOrigin.solicited) {
-      debug('Mqtt::OnDisconnected callback is solicited, this is correct');
+      debug('OnDisconnected callback is solicited, this is correct');
     }
     exit(-1);
   }
 
   /// The successful connect callback
   void onConnected() {
-    debug(
-        'Mqtt::OnConnected client callback - Client connection was sucessful');
+    debug('OnConnected client callback - Client connection was sucessful');
     emit("connect", null, null);
   }
 
   /// Pong callback
   void pong() {
-    //  debug('Mqtt::Ping response client callback invoked');
+    //  debug('Ping response client callback invoked');
   }
 }
+
+final MQTT = Mqtt('nuc1');

@@ -24,9 +24,9 @@ class Logger {
   final List<ConsoleColor> fg_colors = [
     ConsoleColor.brightBlue,
     ConsoleColor.brightRed,
-    ConsoleColor.blue,
-    ConsoleColor.cyan,
     ConsoleColor.green,
+    ConsoleColor.cyan,
+    ConsoleColor.blue,
     ConsoleColor.red,
     ConsoleColor.brightCyan,
     ConsoleColor.brightGreen,
@@ -64,11 +64,12 @@ class Logger {
       final parts = debug.split(';');
       if (parts.contains(prompt)) {
         log = (s) {
-          var elapsed = Now() - lastCall;
+          var now = Now(), elapsed = now - lastCall;
 //          print('$lastCall $now');
           console.setForegroundColor(fg);
           console.setBackgroundColor(bg);
-          console.write('$prompt ');
+
+          console.write('$now $prompt ');
           console.resetColorAttributes();
           console.write('$s ');
           console.setForegroundColor(fg);
