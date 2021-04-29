@@ -1,0 +1,6 @@
+services:
+    presence:
+      image: dart-testing/presence-microservice
+      build:
+        context: .
+        dockerfile: presence/Dockerfile

@@ -1,5 +1,5 @@
 name: presence_microservice
-description: A sample command-line application.
+description: RoboDomo presence-microservice in Dart
 # version: 1.0.0
 # homepage: https://www.example.com
 
@@ -8,12 +8,14 @@ environment:
 
 dependencies:
   dio: ^4.0.0
+
+dependency_overrides:
   debug:
-    path: ../packages/debug
+    path: ../pkg/debug
   mqtt:
-    path: ../packages/mqtt
+    path: ../pkg/mqtt
   HostBase:
-    path: ../packages/HostBase
+    path: ../pkg/HostBase
 #  path: ^1.7.0
 
 dev_dependencies:

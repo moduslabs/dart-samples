@@ -1,5 +1,12 @@
-A sample command-line application with an entrypoint in `bin/`, library code
-in `lib/`, and example unit test in `test/`.
+# dart-testing monorepo
 
-Created from templates made available by Stagehand under a BSD-style
-[license](https://github.com/dart-lang/stagehand/blob/master/LICENSE).
+## Docker support
+
+For each project in the monorepo, there needs to be a Dockerfile and service added
+to the docker-compose.yml file.
+
+Currently, we only have presence (microservice) so we can use docker-compose:
+```# docker-compose build```
+```# docker-compose build presence```
+```# docker-compose up presence```
+```# docker-compose up```

@@ -21,6 +21,21 @@
       <excludeFolder url="file://$MODULE_DIR$/packages/JSON/build" />
       <excludeFolder url="file://$MODULE_DIR$/packages/JSON/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/packages/JSON/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/HostBase/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/HostBase/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/HostBase/build" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/debug/build" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/debug/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/debug/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/JSON/build" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/JSON/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/JSON/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/mqtt/build" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/mqtt/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/mqtt/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/StatefulEmitter/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/StatefulEmitter/build" />
+      <excludeFolder url="file://$MODULE_DIR$/pkg/StatefulEmitter/.dart_tool" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
