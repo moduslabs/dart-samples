@@ -1,14 +1,18 @@
+// @dart=2.12
+
 library mqtt;
 
 import 'dart:collection';
 import 'dart:math';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:debug/debug.dart';
 import 'package:ansicolor/ansicolor.dart';
-import 'package:JSON/JSON.dart';
-import 'package:StatefulEmitter/StatefulEmitter.dart';
+import 'package:json/JSON.dart';
+import 'package:statefulemitter/StatefulEmitter.dart';
+import 'package:typed_data/src/typed_buffer.dart';
 
 typedef Callback = void Function(String topic, String message);
 
@@ -16,9 +20,7 @@ const KEEP_ALIVE = 20;
 
 class Mqtt extends StatefulEmitter {
   final debug = Debug('MQTT');
-  final AnsiPen pen = AnsiPen(),
-      redPen = AnsiPen(),
-  bluePen = AnsiPen();
+  final AnsiPen pen = AnsiPen(), redPen = AnsiPen(), bluePen = AnsiPen();
   var client;
   var broker;
 
@@ -41,9 +43,9 @@ class Mqtt extends StatefulEmitter {
     final connMess = MqttConnectMessage()
         .withClientIdentifier('Mqtt_MyClientUniqueId')
         .keepAliveFor(
-        KEEP_ALIVE) // Must agree with the keep alive set above or not set
+            KEEP_ALIVE) // Must agree with the keep alive set above or not set
         .withWillTopic(
-        'willtopic') // If you set this you must set a will message
+            'willtopic') // If you set this you must set a will message
         .withWillMessage('My Will message')
         .startClean() // Non persistent session for testing
         .withWillQos(MqttQos.atLeastOnce);
@@ -71,8 +73,7 @@ class Mqtt extends StatefulEmitter {
     } else {
       /// Use status here rather than state if you also want the broker return code.
       debug(
-          'ERROR Mosquitto client connection failed - disconnecting, status is ${client
-              .connectionStatus}');
+          'ERROR Mosquitto client connection failed - disconnecting, status is ${client.connectionStatus}');
       client.disconnect();
       exit(-1);
     }
@@ -80,27 +81,32 @@ class Mqtt extends StatefulEmitter {
     /// The client has a change notifier object(see the Observable class) which we then listen to to get
     /// notifications of published updates to each subscribed topic.
     client.updates?.listen((List<MqttReceivedMessage<MqttMessage>> c) {
-      final recMess = c[0].payload as MqttPublishMessage;
-      final pt =
-      MqttPublishPayload?.bytesToStringAsString(recMess?.payload?.message);
-      final topic = c[0].topic;
+      try {
+        final recMess = c[0].payload as MqttPublishMessage;
+        var b = recMess.payload.message;
+        if (b == null) {
+          b = [] as Uint8Buffer;
+        }
+        final pt = MqttPublishPayload.bytesToStringAsString(b);
+        final topic = c[0].topic;
 
-      debug('message <<< $topic $pt');
+        debug('message <<< $topic $pt');
 //      debug('received $topic $pt');
-      var l = subscriptions[topic];
-      if (l != null) {
-        l.forEach((cb) {
-          cb(topic, pt);
-        });
-      }
+        var l = subscriptions[topic];
+        if (l != null) {
+          l.forEach((cb) {
+            cb(topic, pt);
+          });
+        }
 
-      /// The above may seem a little convoluted for users only interested in the
-      /// payload, some users however may be interested in the received publish message,
-      /// lets not constrain ourselves yet until the package has been in the wild
-      /// for a while.
-      /// The payload is a byte buffer, this will be specific to the topic
+        /// The above may seem a little convoluted for users only interested in the
+        /// payload, some users however may be interested in the received publish message,
+        /// lets not constrain ourselves yet until the package has been in the wild
+        /// for a while.
+        /// The payload is a byte buffer, this will be specific to the topic
 //      debug('${c[0].topic}: $pt');
-      //    debug('');
+        //    debug('');
+      } catch (e) {}
     });
   }
 
@@ -133,8 +139,9 @@ class Mqtt extends StatefulEmitter {
       final hl = s.substring(0, min(s.length, 40));
       print('${Now()} message ${pen('>>>')} ${redPen(topic)} ${bluePen(hl)}');
       // debug('message >>> $topic ${s.substring(0, min(s.length, 40))}');
-      return client.publishMessage(topic, r, builder.payload);} catch (e, st) {
-    print('publish ($topic, $message) exception $e $st');
+      return client.publishMessage(topic, r, builder.payload);
+    } catch (e, st) {
+      print('publish ($topic, $message) exception $e $st');
     }
   }
 

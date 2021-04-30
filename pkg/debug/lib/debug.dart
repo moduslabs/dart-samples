@@ -1,6 +1,21 @@
-/// Support for doing something awesome.
+/// debug function
 ///
-/// More dartdocs go here.
+/// Instance of local Logger class
+///
+/// provides debug() functionality similar/identical to the JavaScript one
+/// by TJ Holowaychuck
+///
+/// Use:
+///   import 'package:debug/debug.dart';
+///   final debug = Debug('identifier');
+///   ...
+///   debug('print some message');
+///
+/// If 'identifier' (no quotes) is defined in ENV variable DEBUG, then the
+/// message is printed, along with elapsed time.
+///
+/// DEBUG has the format: id;id;id... TODO: wildcards
+///
 library debug;
 
 import 'dart:io';
@@ -20,7 +35,12 @@ class Logger {
   ConsoleColor fg = ConsoleColor.black, bg = ConsoleColor.white;
   var log;
 
+  // foreground/background colors are pairs that work well (e.g. black on white)
+  // nextColor defines what color scheme is used for the current/next instance
+  // of debug (so each module/identifier gets a unique color scheme)
   static int nextColor = 0;
+
+  /// list of foreground colors
   final List<ConsoleColor> fg_colors = [
     ConsoleColor.brightBlue,
     ConsoleColor.brightRed,
@@ -33,6 +53,8 @@ class Logger {
     ConsoleColor.black,
     ConsoleColor.brightBlack,
   ];
+
+  /// list of background colors
   final List<ConsoleColor> bg_colors = [
     ConsoleColor.black,
     ConsoleColor.black,
@@ -46,12 +68,14 @@ class Logger {
     ConsoleColor.white,
   ];
 
+  /// constructor(key)
+  ///
+  /// key is the unique identifer defined in DEBUG env variable
   Logger(String key) {
     prompt = key;
     fg = fg_colors[nextColor];
     bg = bg_colors[nextColor];
 
-//    print("lastCall $lastCall");
     if (++nextColor >= fg_colors.length) {
       nextColor = 0;
     }
@@ -65,7 +89,6 @@ class Logger {
       if (parts.contains(prompt)) {
         log = (s) {
           var now = Now(), elapsed = now - lastCall;
-//          print('$lastCall $now');
           console.setForegroundColor(fg);
           console.setBackgroundColor(bg);
 
@@ -75,7 +98,6 @@ class Logger {
           console.setForegroundColor(fg);
           console.setBackgroundColor(bg);
           console.writeLine('+${elapsed}ms');
-//          lastCall = now;
           console.resetColorAttributes();
         };
       } else {
@@ -85,6 +107,10 @@ class Logger {
   }
 }
 
+/// Debug(key)
+///
+/// returns a debug(s) function that you can call to optionally print
+/// out status/debugging messages
 Function(String s) Debug(String name) {
   var d = Logger(name);
   return d.log;

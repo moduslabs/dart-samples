@@ -1,21 +1,22 @@
-// @dart=2.9
+/// // @dart=2.9
+// @dart=2.12
 import 'package:mqtt/MQTT.dart';
 import 'package:dio/dio.dart';
 import 'dart:io' show Platform;
 
 import 'package:debug/debug.dart';
-import 'package:HostBase/HostBase.dart';
+import 'package:hostbase/HostBase.dart';
 
 final debug = Debug('main');
 
-final MQTT_HOST = "nuc1";
+final MQTT_HOST = 'nuc1';
 const POLL_TIME = 5;
 const FAST_POLL = 1;
 // const TIMEOUT = 15000;
-const TIMEOUT = 10000;
+const TIMEOUT = 15000;
 
 class PresenceHost extends HostBase {
-  String device, person;
+  late String device, person;
   final debug = Debug('PresenceHost');
 
   PresenceHost(presence)
@@ -26,17 +27,19 @@ class PresenceHost extends HostBase {
     run();
   }
 
+  @override
   void run() async {
     for (;;) {
       // debug('poll $device');
       var s = {};
       try {
         var dio = Dio();
-        // dio.options.connectTimeout = TIMEOUT;
+        dio.options.connectTimeout = TIMEOUT;
         final response = await dio.get('https://$device.');
         debug('response $response');
       } catch (e) {
-        if (e is String || e.type == DioErrorType.connectTimeout) {
+        if (e is String ||
+            (e is DioError && e.type == DioErrorType.connectTimeout)) {
           // timeout
           debug('$person away TIMEOUT $TIMEOUT');
           s[person] = false;
@@ -44,21 +47,23 @@ class PresenceHost extends HostBase {
           continue;
         }
         try {
-          switch (e.error.osError.errorCode) {
-            case 121: // no route to host
-              debug('$person away');
-              s[person] = false;
-              setState(s);
-              break;
-            // case 1225: // connection refused
-            // case 10053: // connection aborted
-            // case 10054: // connection reset by peer
-            default:
-              // connection attempted and refused, reset, aborted, etc.
-              debug('$person home');
-              s[person] = true;
-              setState(s);
-              break;
+          if (e is DioError) {
+            switch (e.error.osError.errorCode) {
+              case 121: // no route to host
+                debug('$person away');
+                s[person] = false;
+                setState(s);
+                break;
+              // case 1225: // connection refused
+              // case 10053: // connection aborted
+              // case 10054: // connection reset by peer
+              default:
+                // connection attempted and refused, reset, aborted, etc.
+                debug('$person home');
+                s[person] = true;
+                setState(s);
+                break;
+            }
           }
         } catch (e) {
           debug('bad $e');
