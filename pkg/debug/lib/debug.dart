@@ -18,8 +18,8 @@
 ///
 library debug;
 
-import 'dart:io';
 import 'package:dart_console/dart_console.dart';
+import 'package:env/Env.dart';
 
 final console = Console();
 
@@ -80,8 +80,7 @@ class Logger {
       nextColor = 0;
     }
 
-    final envVars = Platform.environment;
-    var debug = envVars['DEBUG'];
+    final debug = Env.get('DEBUG');
     if (debug == null) {
       log = (s) {};
     } else {

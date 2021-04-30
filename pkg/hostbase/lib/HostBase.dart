@@ -111,15 +111,20 @@ abstract class HostBase extends StatefulEmitter {
   ///
   /// Caller must JSON.parse() it if it is expected to be an Object/Map.
   ///
-  static Future<Map<String, dynamic>> getSetting(String setting) async {
+  static Future<Map<String, dynamic>>? getSetting(String? setting) async {
+    if (setting == null) {
+      return {};
+    }
     var host = Env.get('MONGODB_HOST');
     if (host == null) {
+      debug('getSetting: no MONGODB_HOST');
       host = 'nuc1';
     }
-    var db = Db('mongodb://${host}:27017/settings');
+    host = 'mongodb://${host}:27017/settings';
+    final db = Db(host);
     await db.open();
-    var collection = db.collection('config');
-    var s = await collection.findOne({"_id": setting});
+    final collection = await db.collection('config');
+    final s = await collection.findOne({"_id": setting}) ?? {};
     await db.close();
     return Future.value(s);
   }
