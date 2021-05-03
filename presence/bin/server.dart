@@ -107,7 +107,7 @@ Future<int> main() async {
   // debug('Subscribing to $topic topic $onMessage');
   // MQTT.subscribe(topic, onMessage);
 
-  while (true) {
+ for(;;) {
     await HostBase.wait(120);
   }
 }

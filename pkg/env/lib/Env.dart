@@ -9,4 +9,12 @@ class Env {
 
     return _envVars[key];
   }
+
+  static void dump() {
+    Map<String, String> _envVars = Platform.environment;
+    _envVars.forEach((k, v) {
+      print('key($k) v($v)');
+    });
+
+  }
 }

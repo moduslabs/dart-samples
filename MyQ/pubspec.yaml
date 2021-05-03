@@ -6,7 +6,17 @@ description: A simple command-line application.
 environment:
   sdk: '>=2.10.0 <3.0.0'
 
-#dependencies:
+dependencies:
+  myq:
+    path: ../pkg/myq
+  debug:
+    path: ../pkg/debug
+  env:
+    path: ../pkg/env
+  mqtt:
+    path: ../pkg/mqtt
+  hostbase:
+    path: ../pkg/hostbase
 #  path: ^1.7.0
 
 dev_dependencies:
