@@ -5,7 +5,7 @@ library mqtt;
 import 'dart:collection';
 import 'dart:math';
 import 'dart:io';
-import 'dart:typed_data';
+// import 'dart:typed_data';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:debug/debug.dart';

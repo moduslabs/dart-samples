@@ -66,7 +66,7 @@ abstract class HostBase extends StatefulEmitter {
   ///
   /// abstract (async) function run().  In your child class, you override this and implement the guts of your polling/WebSocket monitoring, etc.
   ///
-  void run() ;
+  Future<Never> run() ;
 
   ///
   /// abstract (async) function command(command, args) is called when a command is received via MQTT.
@@ -90,7 +90,7 @@ abstract class HostBase extends StatefulEmitter {
   ///
   /// publishes to topic $topic/status/$key, message is value.
   ///
-  /// if value is an object, it is stringified as JSON before sending.
+  /// if value is an object, it is converted as JSON before sending.
   ///
   void publish(String key, value) {
     final t = '${this.topic}/status/${key}';

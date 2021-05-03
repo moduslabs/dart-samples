@@ -1,5 +1,5 @@
-name: mqtt
-description: MQTT class
+name: myq
+description: MyQ class (control MyQ garage doors and monitor sensors)
 version: 1.0.0
 # homepage: https://www.example.com
 
@@ -7,7 +7,8 @@ environment:
   sdk: '>=2.10.0 <3.0.0'
 
 dependencies:
-  mqtt_client: ^9.2.0
+  dio: ^4.0.0
+  crypto: ^3.0.1
   ansicolor: ^2.0.1
   statefulemitter:
     path: ../statefulemitter

@@ -28,7 +28,7 @@ class PresenceHost extends HostBase {
   }
 
   @override
-  void run() async {
+  Future<Never> run() async {
     for (;;) {
       // debug('poll $device');
       var s = {};
