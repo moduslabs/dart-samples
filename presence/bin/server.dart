@@ -10,9 +10,8 @@ import 'package:hostbase/HostBase.dart';
 final debug = Debug('main');
 
 final MQTT_HOST = 'nuc1';
-const POLL_TIME = 5;
-const FAST_POLL = 1;
-// const TIMEOUT = 15000;
+const POLL_TIME = 5; // in seconds
+const FAST_POLL = 1; // in seconds
 const TIMEOUT = 15000;
 
 class PresenceHost extends HostBase {
@@ -21,9 +20,10 @@ class PresenceHost extends HostBase {
 
   PresenceHost(presence)
       : super(MQTT_HOST, "presence/${presence["person"]}", false) {
+    //
     device = presence['device'];
     person = presence['person'];
-    debug('Construct PresenceHost $host $setRoot');
+    // debug('Construct PresenceHost $host $_setRoot');
     run();
   }
 
@@ -74,7 +74,7 @@ class PresenceHost extends HostBase {
       // or it might hurt battery life
       final st = (state as Map)[person];
       if (st == null || st) {
-        await HostBase.wait(POLL_TIME);
+        await HostBase.sleep(POLL_TIME);
       }
     }
   }
@@ -108,6 +108,6 @@ Future<int> main() async {
   // MQTT.subscribe(topic, onMessage);
 
  for(;;) {
-    await HostBase.wait(120);
+    await HostBase.sleep(120);
   }
 }

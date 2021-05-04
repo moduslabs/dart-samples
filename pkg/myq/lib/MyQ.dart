@@ -4,7 +4,7 @@
 /// Provides interface for interacting with MyQ devices (garage door openers and sensors)
 ///
 // @dart=2.12
-library MyQ;
+library myq;
 
 import 'package:debug/debug.dart';
 import 'package:dio/dio.dart';
@@ -121,12 +121,9 @@ class MyQ {
     }
     String url = '${options["baseUrl"]}/${options["url"]}';
     var dio = Dio();
-    print('options ${dio.options} url($url)');
-    print('headers $headers');
     String method = options['method'];
     switch (method) {
       case 'get':
-        print('get url($url) headers($headers) queryParameters ${options["params"]}');
         return await dio.get(url, options: Options(headers: headers), queryParameters: options['params']);
       case 'post':
         return await dio.post(url,
@@ -203,66 +200,75 @@ class MyQ {
 
   // await login(email, password)
   Future<Map<String, dynamic>> login(String email, String password) async {
-    if (email == null || password == null) {
-      throw MyQError(
-          'MyQ.login email and password required', 'ERR_MYQ_LOGIN_REQUIRED');
-    }
-    final loginResponse = await _executeServiceRequest({
-      "baseUrl": constants['baseUrls']!['auth'],
-      "url": constants['routes']!['login'],
-      "method": 'post',
-      "headers": {
-        "securityToken": null,
-      },
-      "data": {
-        "Username": email,
-        "Password": password,
+    try {
+      final loginResponse = await _executeServiceRequest({
+        "baseUrl": constants['baseUrls']!['auth'],
+        "url": constants['routes']!['login'],
+        "method": 'post',
+        "headers": {
+          "securityToken": null,
+        },
+        "data": {
+          "Username": email,
+          "Password": password,
+        }
+      });
+
+      if (loginResponse.data['SecurityToken'] == null) {
+        throw MyQError(
+            'Service did not return security token',
+            'INVALID_SERVICE_RESPONSE');
       }
-    });
 
-    print('loginResponse ($loginResponse.data)');
-    if ( loginResponse.data['SecurityToken'] == null) {
-      throw MyQError(
-          'Service did not return security token', 'INVALID_SERVICE_RESPONSE');
+      _securityToken = loginResponse.data['SecurityToken'];
+      _accountId = null;
+      _devices = [];
+
+      return {
+        "code": constants['codes']!['OK'],
+        "securityToken": _securityToken,
+      };
     }
-
-    _securityToken = loginResponse.data['SecurityToken'];
-    _accountId = null;
-    _devices = [];
-
-    return {
-      "code": constants['codes']!['OK'],
-      "securityToken": _securityToken,
-    };
+    catch (e) {
+      // print('login exception e $e');
+      return {
+        "code": constants['codes']!['SERVICE_REQUEST_FAILED'],
+        "securityToken": null
+      };
+    }
   }
 
   Future<Map<String, dynamic>> getDevices() async {
-    if (_accountId == null) {
-      await _getAccountId();
+    try {
+      if (_accountId == null) {
+        await _getAccountId();
+      }
+
+      final String url = constants['routes']!['getDevices'] as String;
+      final getDevicesServiceResponse = await _executeServiceRequest({
+        "baseUrl": constants['baseUrls']!['device'],
+        "url": url.replaceAll('{accountId}', _accountId),
+        "method": 'get'
+      });
+
+      if (getDevicesServiceResponse.data == null ||
+          getDevicesServiceResponse.data['items'] == null) {
+        throw MyQError(
+            'Service did not return valid devices', 'INVALID_SERVICE_RESPONSE');
+      }
+
+      _devices = getDevicesServiceResponse.data['items'];
+
+      return {"code": constants['codes']!['OK'], "devices": _devices};
     }
-
-    final String url = constants['routes']!['getDevices'] as String;
-    final getDevicesServiceResponse = await _executeServiceRequest({
-      "baseUrl": constants['baseUrls']!['device'],
-      "url": url.replaceAll('{accountId}', _accountId),
-      "method": 'get'
-    });
-
-    if (getDevicesServiceResponse == null ||
-        getDevicesServiceResponse.data == null ||
-        getDevicesServiceResponse.data['items'] == null) {
-      throw MyQError(
-          'Service did not return valid devices', 'INVALID_SERVICE_RESPONSE');
+    catch (e) {
+      return {"code": constants['codes']!['ERR_MYQ_AUTHENTICATION_FAILED_LOCKED_OUT'], "devices": null};
     }
-
-    _devices = getDevicesServiceResponse.data['items'];
-
-    return {"code": constants['codes']!['OK'], "devices": _devices};
   }
 
   Map<String, dynamic> findDevice(String serialNumber) {
     final device = _devices!.firstWhere((device) {
-      return device.serial_number == serialNumber;
+      return device['serial_number'] == serialNumber;
     });
     return device;
   }
@@ -271,10 +277,10 @@ class MyQ {
     await this.getDevices();
     final device = findDevice(serialNumber);
 
-    if (device == null) {
-      throw MyQError('Could not find device with serial number "$serialNumber"',
-          'DEVICE_NOT_FOUND');
-    }
+    // if (device == null) {
+    //   throw MyQError('Could not find device with serial number "$serialNumber"',
+    //       'DEVICE_NOT_FOUND');
+    // }
     return {"code": constants['codes']!['OK'], "device": device};
   }
 

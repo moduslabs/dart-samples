@@ -5,7 +5,6 @@ library mqtt;
 import 'dart:collection';
 import 'dart:math';
 import 'dart:io';
-// import 'dart:typed_data';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:debug/debug.dart';
@@ -14,7 +13,7 @@ import 'package:json/JSON.dart';
 import 'package:statefulemitter/StatefulEmitter.dart';
 import 'package:typed_data/src/typed_buffer.dart';
 
-typedef Callback = void Function(String topic, String message);
+typedef Callback = Future<void> Function(String topic, String message);
 
 const KEEP_ALIVE = 20;
 
@@ -90,22 +89,29 @@ class Mqtt extends StatefulEmitter {
         final pt = MqttPublishPayload.bytesToStringAsString(b);
         final topic = c[0].topic;
 
-        debug('message <<< $topic $pt');
-//      debug('received $topic $pt');
+        ansiColorDisabled = false;
+
+        pen
+          ..reset()
+          ..white(bold: true);
+        redPen
+          ..reset()
+          ..red(bold: true);
+        bluePen
+          ..reset()
+          ..blue(bold: true);
+
+        // pen.black(bold: true)(
+        final hl = pt.substring(0, min(pt.length, 40));
+        print('${Now()} message ${pen('<<<')} ${redPen(topic)} ${bluePen(hl)}');
+        // debug('message <<< $topic $pt');
         var l = subscriptions[topic];
         if (l != null) {
-          l.forEach((cb) {
-            cb(topic, pt);
+          l.forEach((cb) async {
+            await cb(topic, pt);
           });
         }
-
-        /// The above may seem a little convoluted for users only interested in the
-        /// payload, some users however may be interested in the received publish message,
-        /// lets not constrain ourselves yet until the package has been in the wild
-        /// for a while.
-        /// The payload is a byte buffer, this will be specific to the topic
-//      debug('${c[0].topic}: $pt');
-        //    debug('');
+        emit('message', null, {"topic": topic, "message": pt});
       } catch (e) {}
     });
   }
@@ -138,22 +144,24 @@ class Mqtt extends StatefulEmitter {
       // pen.black(bold: true)(
       final hl = s.substring(0, min(s.length, 40));
       print('${Now()} message ${pen('>>>')} ${redPen(topic)} ${bluePen(hl)}');
-      // debug('message >>> $topic ${s.substring(0, min(s.length, 40))}');
       return client.publishMessage(topic, r, builder.payload);
     } catch (e, st) {
       print('publish ($topic, $message) exception $e $st');
     }
   }
 
-  void subscribe(String topic, Callback callback) {
+  void subscribe(String topic, Callback? callback) {
     var l = subscriptions[topic];
     if (l == null) {
       subscriptions[topic] = [];
       l = subscriptions[topic];
     }
-    subscriptions[topic]?.add(callback);
-    debug('subscribe $l');
-    if (subscriptions[topic]?.length == 1) {
+    if (callback != null) {
+      subscriptions[topic]?.add(callback);
+    }
+    debug('subscribe $topic');
+    int len = subscriptions[topic]?.length ?? 0;
+    if (len == 1 || (len == 0 && callback == null)) {
       client.subscribe(topic, MqttQos.atMostOnce);
     }
   }
