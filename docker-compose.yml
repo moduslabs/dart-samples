@@ -3,7 +3,7 @@ services:
       image: dart-testing/presence-microservice
       build:
         context: .
-        dockerfile: presence/Dockerfile
+        dockerfile: presence-microservice/Dockerfile
 
     myq:
       environment:
@@ -12,4 +12,14 @@ services:
       image: dart-testing/myq-microservice
       build:
         context: .
-        dockerfile: myq/Dockerfile
+        dockerfile: myq-microservice/Dockerfile
+
+    weather:
+      environment:
+        - WEATHER_APP_ID=${WEATHER_APP_ID}
+        - WEATHER_APP_CODE=${WEATHER_APP_CODE}
+        - METRIC=false
+      image: dart-testing/weather-microservice
+      build:
+        context: .
+        dockerfile: weather-microservice/Dockerfile
