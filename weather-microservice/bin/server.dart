@@ -1,7 +1,6 @@
 // @dart=2.12
 
 import 'package:dio/dio.dart';
-import 'dart:convert'; //Don't forget to import this
 import 'package:env/Env.dart';
 import 'package:mqtt/MQTT.dart';
 import 'package:debug/debug.dart';
@@ -19,20 +18,6 @@ final WEATHER_APP_ID = Env.get('WEATHER_APP_ID'),
 final String WEATHER_POLL_TIME = Env.get('WEATHER_POLL_TIME') ?? '';
 final int POLL_TIME =
     WEATHER_POLL_TIME != '' ? int.parse(WEATHER_POLL_TIME) : 60 * 5;
-
-void prettyPrintJson(String input) {
-  final decoder = JsonDecoder();
-  final encoder = JsonEncoder.withIndent('  ');
-  final dynamic object = decoder.convert(input);
-  final dynamic prettyString = encoder.convert(object);
-  prettyString.split('\n').forEach((dynamic element) => print(element));
-}
-
-void examine(input) {
-  final encoder = JsonEncoder.withIndent('  ');
-  final dynamic prettyString = encoder.convert(input);
-  prettyString.split('\n').forEach((dynamic element) => print(element));
-}
 
 class WeatherHost extends HostBase {
   late String _zipCode, _name, _kind;
@@ -297,7 +282,8 @@ Future<Never> main(List<String> arguments) async {
 
   await MQTT.connect();
   var config = await HostBase.getSetting('config') ?? {};
-  print('config ${config["weather"]}');
+  examine('Config', config['weather']);
+  // print('config ${config["weather"]}');
   //
   final locations = config['weather']['locations'];
   locations.forEach((location) {
