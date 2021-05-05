@@ -31,7 +31,7 @@ class PresenceHost extends HostBase {
   Future<Never> run() async {
     for (;;) {
       // debug('poll $device');
-      var s = {};
+      final Map<String, dynamic>s = {};
       try {
         var dio = Dio();
         dio.options.connectTimeout = TIMEOUT;
@@ -72,7 +72,7 @@ class PresenceHost extends HostBase {
 
       // if person's phone is present, we don't want to ping it super fast
       // or it might hurt battery life
-      final st = (state as Map)[person];
+      final st = state[person];
       if (st == null || st) {
         await HostBase.sleep(POLL_TIME);
       }

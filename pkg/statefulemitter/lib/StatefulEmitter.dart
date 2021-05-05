@@ -16,7 +16,7 @@ library StatefulEmitter;
 import 'package:eventify/eventify.dart';
 
 class StatefulEmitter extends EventEmitter {
-  Object _state = {};
+  Map<String,dynamic> _state = {};
 
   // constructor
   StatefulEmitter() {}
@@ -27,19 +27,19 @@ class StatefulEmitter extends EventEmitter {
   }
 
   // setter for state
-  void set state(newState) {
+  void set state(Map<String, dynamic>newState) {
     var oldState = _state;
     _state = newState;
     emit('statechange', null, oldState );
   }
 
   // getter for state
-  Object get state {
+  Map<String, dynamic> get state {
     return _state;
   }
 
   // React style setState (same as state setter)
-  void setState(newState) {
+  void setState(Map<String, dynamic>newState) {
     state = newState;
   }
 }

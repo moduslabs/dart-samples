@@ -117,19 +117,25 @@ class MyQ {
       headers['UserAgent'] = base64Url.encode(values);
     }
     if (_securityToken != null) {
-      headers['SecurityToken'] =  _securityToken;
+      headers['SecurityToken'] = _securityToken;
     }
     String url = '${options["baseUrl"]}/${options["url"]}';
     var dio = Dio();
     String method = options['method'];
     switch (method) {
       case 'get':
-        return await dio.get(url, options: Options(headers: headers), queryParameters: options['params']);
+        return await dio.get(url,
+            options: Options(headers: headers),
+            queryParameters: options['params']);
+
       case 'post':
         return await dio.post(url,
             options: Options(headers: headers), data: options['data']);
+
       case 'put':
-        return await dio.put(url, options: Options(headers: headers));
+        return await dio.put(url,
+            options: Options(headers: headers), data: options['data']);
+
       default:
         throw 'invalid method $method';
     }
@@ -175,7 +181,7 @@ class MyQ {
     //
     final Map<String, dynamic> device = findDevice(serialNumber);
 
-    if (device == null || device['state'][stateAttribute] == null) {
+    if (device['state'][stateAttribute] == null) {
       throw MyQError('State attribute $stateAttribute is not present on device',
           constants['codes']!['DEVICE_STATE_NOT_FOUND'] as String?);
     }
@@ -215,8 +221,7 @@ class MyQ {
       });
 
       if (loginResponse.data['SecurityToken'] == null) {
-        throw MyQError(
-            'Service did not return security token',
+        throw MyQError('Service did not return security token',
             'INVALID_SERVICE_RESPONSE');
       }
 
@@ -228,8 +233,7 @@ class MyQ {
         "code": constants['codes']!['OK'],
         "securityToken": _securityToken,
       };
-    }
-    catch (e) {
+    } catch (e) {
       // print('login exception e $e');
       return {
         "code": constants['codes']!['SERVICE_REQUEST_FAILED'],
@@ -260,9 +264,11 @@ class MyQ {
       _devices = getDevicesServiceResponse.data['items'];
 
       return {"code": constants['codes']!['OK'], "devices": _devices};
-    }
-    catch (e) {
-      return {"code": constants['codes']!['ERR_MYQ_AUTHENTICATION_FAILED_LOCKED_OUT'], "devices": null};
+    } catch (e) {
+      return {
+        "code": constants['codes']!['ERR_MYQ_AUTHENTICATION_FAILED_LOCKED_OUT'],
+        "devices": null
+      };
     }
   }
 
@@ -301,10 +307,10 @@ class MyQ {
   Future<Map<String, dynamic>> setDoorState(
       String serialNumber, String action) async {
     try {
-      switch (action) {
+      switch (action.toLowerCase()) {
         case 'open':
         case 'close':
-          return await _setDeviceState(serialNumber, action,
+          return await _setDeviceState(serialNumber, action.toLowerCase(),
               constants['stateAttributes']!['doorState'] as String?);
         default:
           throw MyQError(

@@ -18,14 +18,14 @@ final EMAIL = Env.get('MYQ_EMAIL') ?? '',
 const POLL_TIME = 2 * 1000;
 
 class MyQHost extends HostBase {
-  late Map<String, dynamic> _device;
+  // late Map<String, dynamic> _device;
   late String _name, _type, _serialNumber;
   bool _lowBatteryState = false;
   var _account;
 
   MyQHost(device) : super(MQTT_HOST, '$TOPIC_ROOT/${device['name']}', false) {
     //
-    _device = device;
+    // _device = device;
     _name = device['name'];
     _type = device['device_family'];
     _serialNumber = device['serial_number'];
@@ -34,6 +34,41 @@ class MyQHost extends HostBase {
     run();
   }
 
+  bool _isOpen() {
+    final door_state = state['door_state'];
+    try {
+      return (door_state == true || door_state.toLowerCase() == 'open');
+    } catch (e) {
+      return false;
+    }
+  }
+
+  bool _isClosed() {
+    final door_state = state['door_state'];
+    try {
+      return (door_state == false || door_state.toLowerCase() == 'closed');
+    } catch (e) {
+      return true;
+    }
+  }
+
+  bool _isOn() {
+    final light_state = state['light_state'];
+    try {
+      return (light_state == true || light_state.toLowerCase() == 'on');
+    } catch (e) {
+      return false;
+    }
+  }
+
+  bool _isOff() {
+    final light_state = state['light_state'];
+    try {
+      return (light_state == false || light_state.toLowerCase() == 'off');
+    } catch (e) {
+      return false;
+    }
+  }
   /// run()
   /// Forever login, then poll device status
   @override
@@ -57,9 +92,11 @@ class MyQHost extends HostBase {
         try {
           final result = await account.getDevice(_serialNumber);
           if (result['code'] == 'OK') {
-            final device = result['device'],
-                newState = device['state'];
-            final s = {};
+            final device = result['device'], newState = device['state'];
+
+            // this generates warning, but we need to pass this style Map to setState!
+            // final Map<String, dynamic> s = {};
+            final Map<String, dynamic>s = {};
             newState.keys.forEach((key) {
               if (key != 'physical_devices') {
                 s[key] = newState[key];
@@ -72,14 +109,17 @@ class MyQHost extends HostBase {
                 case 'door_state':
                   s['door_state'] = newState[key];
                   break;
+                case 'light_state':
+                  s['light_state'] = newState[key];
+                  break;
               }
               // print('newState $key ${newState[key]}');
             });
             setState(s);
           }
-        } catch (e) {
-          print('$_name Exception $e');
-          // print(st);
+        } catch (e, st) {
+          print('$_name getDevice Exception $e');
+          print(st);
         }
         await HostBase.wait(POLL_TIME);
       }
@@ -88,8 +128,39 @@ class MyQHost extends HostBase {
 
   @override
   Future<void> command(cmd, args) async {
-    //
-    print('cmd $cmd args $args');
+    try {
+      if (cmd.toUpperCase() == 'DOOR') {
+        if (args == 'OPEN') {
+          if (_isClosed()) {
+            debug('open garage door door ($_name)');
+            await _account.setDoorState(_serialNumber, 'OPEN');
+          }
+        } else if (args == 'CLOSE') {
+          if (_isOpen()) {
+            debug('close garage door door ($_name)');
+            await _account.setDoorState(_serialNumber, 'CLOSE');
+          }
+        } else {
+          print('illegal command "$cmd');
+        }
+      } else if (cmd.toUpperCase() == 'LIGHT') {
+        if (args == 'ON') {
+          if (_isOff()) {
+            debug('Turn on light for door ($_name)');
+            await _account.setLightState(_serialNumber, 'ON');
+          }
+        } else if (args == 'OFF') {
+          if (_isOn()) {
+            debug('Turn off light for door ($_name)');
+            await _account.setLightState(_serialNumber, 'OFF');
+          }
+        } else {
+          print('illegal command "$cmd');
+        }
+      }
+    } catch (e) {
+      print('$_name command exception $e');
+    }
   }
 }
 
@@ -102,7 +173,7 @@ Future<Never> main(List<String> arguments) async {
   for (;;) {
     final loggedIn = await account.login(EMAIL, PASSWORD);
     if (loggedIn['code'] != 'OK') {
-      print('login failed');
+      print('login failed ${loggedIn['code']}');
     } else {
       print('login succeeded');
       break;
@@ -122,8 +193,7 @@ Future<Never> main(List<String> arguments) async {
       } else {
         print('device error  ${devices['code']}');
       }
-    }
-    catch (e) {
+    } catch (e) {
       //
     }
   }

@@ -50,29 +50,16 @@ abstract class HostBase extends StatefulEmitter {
           exit(0);
         }
         final command = topic.substring(_setRootLength + 1);
-        // print(
-        //     'command($command) message($message) topic($topic) setRoot($_setRoot) setRootLength($_setRootLength)');
         await this.command(command.toUpperCase(), message);
       }
     });
 
     MQTT.subscribe("${_setRoot}/#", null);
-    // MQTT.subscribe("${setRoot}/#", (String topic, String message) async {
-    //   print('topic $topic message $message');
-    //   if (message.indexOf("__RESTART__") != -1) {
-    //     MQTT.publish(topic, null, retain: true);
-    //     MQTT.publish(topic, null, retain: false);
-    //     exit(0);
-    //   }
-    //   final command = topic.substring(setRootLength);
-    //   print('command $command message $message');
-    //   await this.command(command, message);
-    // });
 
     this.on("statechange", null, (ev, context) {
       try {
         Map<dynamic, dynamic> oldState = ev.eventData as Map<dynamic, dynamic>,
-            newState = state as Map<dynamic, dynamic>;
+            newState = state;
 
         bool save = retain;
         newState.keys.forEach((k) {
