@@ -132,6 +132,13 @@ abstract class HostBase extends StatefulEmitter {
     MQTT.publish(t, val);
   }
 
+  static Never abort(String s) {
+    print("");
+    print('***ABORT!!!');
+    print(s);
+    exit(1);
+  }
+
   ///
   /// var settings = await getSetting(String key);
   ///

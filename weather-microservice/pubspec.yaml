@@ -1,5 +1,5 @@
-name: presence_microservice
-description: RoboDomo presence-microservice in Dart
+name: weather_microservice
+description: A simple command-line application.
 # version: 1.0.0
 # homepage: https://www.example.com
 
@@ -10,6 +10,8 @@ dependencies:
   dio: ^4.0.0
   debug:
     path: ../pkg/debug
+  env:
+    path: ../pkg/env
   mqtt:
     path: ../pkg/mqtt
   hostbase:
@@ -18,4 +20,3 @@ dependencies:
 
 #dev_dependencies:
 #  pedantic: ^1.9.0
-#  test: ^1.14.4
