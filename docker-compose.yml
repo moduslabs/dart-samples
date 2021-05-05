@@ -1,0 +1,15 @@
+services:
+    presence:
+      image: dart-testing/presence-microservice
+      build:
+        context: .
+        dockerfile: presence/Dockerfile
+
+    myq:
+      environment:
+        - MYQ_EMAIL=${MYQ_EMAIL}
+        - MYQ_PASSWORD=${MYQ_PASSWORD}
+      image: dart-testing/myq-microservice
+      build:
+        context: .
+        dockerfile: myq/Dockerfile
