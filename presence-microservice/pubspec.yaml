@@ -1,5 +1,5 @@
-name: MyQ
-description: A simple command-line application.
+name: presence_microservice
+description: RoboDomo presence-microservice in Dart
 # version: 1.0.0
 # homepage: https://www.example.com
 
@@ -7,17 +7,15 @@ environment:
   sdk: '>=2.10.0 <3.0.0'
 
 dependencies:
-  myq:
-    path: ../pkg/myq
+  dio: ^4.0.0
   debug:
     path: ../pkg/debug
-  env:
-    path: ../pkg/env
   mqtt:
     path: ../pkg/mqtt
   hostbase:
     path: ../pkg/hostbase
 #  path: ^1.7.0
 
-dev_dependencies:
-  pedantic: ^1.9.0
+#dev_dependencies:
+#  pedantic: ^1.9.0
+#  test: ^1.14.4
