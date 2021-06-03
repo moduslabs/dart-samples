@@ -19,8 +19,7 @@
 library debug;
 
 import 'package:dart_console/dart_console.dart';
-import 'package:env/Env.dart';
-import 'dart:convert';
+import 'package:env_get/env_get.dart';
 
 final console = Console();
 
@@ -115,26 +114,3 @@ Function(String s) Debug(String name) {
   var d = Logger(name);
   return d.log;
 }
-
-void prettyPrintJson(String input) {
-  final decoder = JsonDecoder();
-  final encoder = JsonEncoder.withIndent('  ');
-  final dynamic object = decoder.convert(input);
-  final dynamic prettyString = encoder.convert(object);
-  prettyString.split('\n').forEach((dynamic element) => print(element));
-}
-
-void examine(prompt, input) {
-  final encoder = JsonEncoder.withIndent('  ');
-  if (input != null) {
-    final dynamic prettyString = encoder.convert(input);
-    print(prompt);
-    prettyString.split('\n').forEach((dynamic element) => print(element));
-  }
-  else {
-    final dynamic prettyString = encoder.convert(prompt);
-    prettyString.split('\n').forEach((dynamic element) => print(element));
-
-  }
-}
-

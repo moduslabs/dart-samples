@@ -1,11 +1,11 @@
 // @dart=2.12
 
 // import 'dart:io';
-import 'package:env/Env.dart';
-import 'package:mqtt/MQTT.dart';
-import 'package:myq/MyQ.dart';
+import 'package:env_get/env_get.dart';
+import 'package:modus_mqtt/modus_mqtt.dart';
+import 'package:myq/myq.dart';
 import 'package:debug/debug.dart';
-import 'package:hostbase/HostBase.dart';
+import 'package:hostbase/hostbase.dart';
 
 final debug = Debug('MyQHost');
 

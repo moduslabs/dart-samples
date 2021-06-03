@@ -1,6 +1,6 @@
 // @dart=2.12
 
-library mqtt;
+library modus_mqtt;
 
 import 'dart:collection';
 import 'dart:math';
@@ -9,8 +9,8 @@ import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:debug/debug.dart';
 import 'package:ansicolor/ansicolor.dart';
-import 'package:json/JSON.dart';
-import 'package:statefulemitter/StatefulEmitter.dart';
+import 'package:modus_json/modus_json.dart';
+import 'package:statefulemitter/statefulemitter.dart';
 import 'package:typed_data/src/typed_buffer.dart';
 
 typedef Callback = Future<void> Function(String topic, String message);

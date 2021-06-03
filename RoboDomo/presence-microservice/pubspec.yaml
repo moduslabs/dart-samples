@@ -8,10 +8,9 @@ environment:
 
 dependencies:
   dio: ^4.0.0
-  debug:
-    path: ../pkg/debug
-  mqtt:
-    path: ../pkg/mqtt
+  debug: ^1.0.0
+  modus_mqtt:
+    path: ../pkg/modus_mqtt
   hostbase:
     path: ../pkg/hostbase
 #  path: ^1.7.0

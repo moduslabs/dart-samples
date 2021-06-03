@@ -9,16 +9,12 @@ environment:
 dependencies:
   mqtt_client: ^9.2.0
   mongo_dart: ^0.7.0+1
-  env:
-    path: ../env
-  debug:
-    path: ../debug
-  mqtt:
-    path: ../mqtt
-  json:
-    path: ../json
-  statefulemitter:
-    path: ../statefulemitter
+  env_get: ^1.0.0
+  debug: ^1.0.0
+  modus_mqtt:
+    path: ../modus_mqtt
+  modus_json: ^1.0.0
+  statefulemitter: ^1.0.0
 #  path: ^1.7.0
 
 dev_dependencies:

@@ -25,10 +25,13 @@ main() {
 }
 ```
 
-## Features and bugs
+## Additional methods
 
-[comment]: <> (Please file feature requests and bugs at the [issue tracker][tracker].)
+```
+void prettyPrintJson(String jsonString) => nicely formats string and prints it
 
-[comment]: <> ([tracker]: http://example.com/issues/replaceme)
+void examine(prompt, obj) => prints prompt and pretty prints the object
 
-[comment]: <> ([license]&#40;https://github.com/dart-lang/stagehand/blob/master/LICENSE&#41;.)
+void examine(obj) => pretty print object without a prompt
+```
+

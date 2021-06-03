@@ -9,13 +9,13 @@
 
 library HostBase;
 
-import 'package:statefulemitter/StatefulEmitter.dart';
+import 'package:statefulemitter/statefulemitter.dart';
 import 'package:debug/debug.dart';
-import 'dart:io';
+import "dart:io";
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:mqtt/MQTT.dart';
-import 'package:json/JSON.dart';
-import 'package:env/Env.dart';
+import 'package:modus_mqtt/modus_mqtt.dart';
+import 'package:modus_json/modus_json.dart';
+import 'package:env_get/env_get.dart';
 
 final debug = Debug('HostBase');
 

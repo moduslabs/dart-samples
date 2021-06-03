@@ -1,11 +1,11 @@
 /// // @dart=2.9
 // @dart=2.12
-import 'package:mqtt/MQTT.dart';
+import 'package:modus_mqtt/modus_mqtt.dart';
 import 'package:dio/dio.dart';
 import 'dart:io' show Platform;
 
 import 'package:debug/debug.dart';
-import 'package:hostbase/HostBase.dart';
+import 'package:hostbase/hostbase.dart';
 
 final debug = Debug('main');
 

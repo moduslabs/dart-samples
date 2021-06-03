@@ -9,7 +9,7 @@ For example, you would have a HostBase for each Apple TV in the home/office.
 ## Usage
 
 ```dart
-import 'package:hostbase/HostBase.dart';
+import 'package:hostbase/hostbase.dart';
 
 class AppleTVHost extends HostBase {
   AppleTVHost(String appleTVIpAddress) : super(MQTT_HOST, "appletv", false) {
