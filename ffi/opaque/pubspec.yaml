@@ -13,7 +13,7 @@ dependencies:
   path: ^1.7.0
   ffi: ^1.0.0
 
-dev_dependencies:
-  test: ^1.16.0
-  test_utils:
-    path: ../test_utils
+#dev_dependencies:
+#  test: ^1.16.0
+#  test_utils:
+#    path: ../test_utils
