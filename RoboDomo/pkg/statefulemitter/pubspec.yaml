@@ -1,5 +1,5 @@
 name: statefulemitter
-version: 1.0.0
+version: 1.0.1
 description: >-
   Extended EventEmitter that fires "statechange" event when state member is changed.
 

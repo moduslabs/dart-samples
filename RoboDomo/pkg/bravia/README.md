@@ -1,37 +1,11 @@
-# debug package
+# bravia package
 
-This package provides logging facility nearly identical to the one for NodeJS/Browser by TJ Holwaychuck (npm install
-debug).
+This package provides a class and methods for monitoring state of and sending commands to control Sony Bravia TVs running Android.
 
-You create a debug function by calling Debug(String identifier). If identifier is present in the DEBUG environment
-variable, when you call debug(String s), the string is printed. If identifier is not present in the DEBUG environment
-variable, then debug(String s) prints nothing.
+## TV Setup
 
-Each successive instance of debug() function created gets its own color scheme when printing.  
-
-At the end of each line printed is the elapsed time in milliseconds, so you can time how long between your debug() calls.
-
-## Usage
-
-Sample usage example:
-
-```dart
-import 'package:debug/debug.dart';
-
-final debug = Debug('identifier');
-
-main() {
-  debug('maybe I get printed');
-}
-```
-
-## Additional methods
-
-```
-void prettyPrintJson(String jsonString) => nicely formats string and prints it
-
-void examine(prompt, obj) => prints prompt and pretty prints the object
-
-void examine(obj) => pretty print object without a prompt
-```
-
+1.  Turn on your TV
+2.  On the TV go to Settings > Network > Home network setup > Remote device/Renderer > On
+3.  On the TV go to Settings > Network > Home network setup > IP Control > Authentication > Normal and Pre-Shared Key
+4.  On the TV go to Settings > Network > Home network setup > Remote device/Renderer > Enter Pre-Shared Key > 0000 (or whatever you want your PSK Key to be)
+5.  On the TV go to Settings > Network > Home network setup > Remote device/Renderer > Simple IP Control > On

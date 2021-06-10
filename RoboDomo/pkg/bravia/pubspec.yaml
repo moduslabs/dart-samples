@@ -1,5 +1,5 @@
-name: debug
-description: A starting point for Dart libraries or applications.
+name: bravia
+description: A Dart interface to Sony Bravia TVs (control and monitor)
 version: 1.0.0
 # homepage: https://www.example.com
 
@@ -7,10 +7,11 @@ environment:
   sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
-  dart_console: ^1.0.0
-  env:
-    path: ../env
-#  path: ^1.7.0
+  env_get: ^1.0.0
+  debug: ^1.0.0
+  modus_json: ^1.0.0
+  statefulemitter: ^1.0.0
+  dio: ^4.0.0
 
 dev_dependencies:
   pedantic: ^1.11.0

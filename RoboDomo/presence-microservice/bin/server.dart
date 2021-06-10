@@ -102,11 +102,6 @@ Future<int> main() async {
     hosts.add(PresenceHost(person));
   }
 
-  /// Ok, lets try a subscription
-  // const topic = 'hubitat/Back Room Light/status/switch'; // Not a wildcard topic
-  // debug('Subscribing to $topic topic $onMessage');
-  // MQTT.subscribe(topic, onMessage);
-
  for(;;) {
     await HostBase.sleep(120);
   }

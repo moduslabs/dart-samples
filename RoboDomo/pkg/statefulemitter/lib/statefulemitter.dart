@@ -27,7 +27,10 @@ class StatefulEmitter extends EventEmitter {
   }
 
   // setter for state
-  void set state(Map<String, dynamic>newState) {
+  void set state(Map<String, dynamic>value) {
+    final newState = {};
+    newState.addAll(_state);
+    newState.addAll(value);
     var oldState = _state;
     _state = newState;
     emit('statechange', null, oldState );
