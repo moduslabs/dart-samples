@@ -1,6 +1,6 @@
 name: hostbase
 description: Common abstract base class for "hosts"
-version: 1.0.0
+version: 1.0.1
 # homepage: https://www.example.com
 
 environment:
@@ -14,7 +14,9 @@ dependencies:
   modus_mqtt:
     path: ../modus_mqtt
   modus_json: ^1.0.0
-  statefulemitter: ^1.0.0
+  statefulemitter: ^1.0.2
+#  statefulemitter:
+#    path: ../statefulemitter
 #  path: ^1.7.0
 
 dev_dependencies:

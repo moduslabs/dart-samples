@@ -9,13 +9,14 @@
 
 library HostBase;
 
-import 'package:statefulemitter/statefulemitter.dart';
-import 'package:debug/debug.dart';
+import 'package:collection/equality.dart';
 import "dart:io";
 import 'package:mongo_dart/mongo_dart.dart';
+import 'package:statefulemitter/statefulemitter.dart';
+import 'package:debug/debug.dart';
+import 'package:env_get/env_get.dart';
 import 'package:modus_mqtt/modus_mqtt.dart';
 import 'package:modus_json/modus_json.dart';
-import 'package:env_get/env_get.dart';
 
 final debug = Debug('HostBase');
 
@@ -34,8 +35,6 @@ abstract class HostBase extends StatefulEmitter {
     _setRoot = topic + "/set";
     _setRootLength = _setRoot.length;
     _statusRoot = topic + "/status";
-
-    print("HostBase $_setRoot, $_setRootLength");
 
     //
     MQTT.on('message', null, (evt, ctx) async {
@@ -64,8 +63,13 @@ abstract class HostBase extends StatefulEmitter {
         bool save = retain;
         newState.keys.forEach((k) {
           // ignore mongodb's generated _id field
-          if (oldState[k] != newState[k] || oldState[k] == null) {
+          if (!DeepCollectionEquality().equals(oldState[k], newState[k])) {
+            state[k] = newState[k];
             publish(k, newState[k]);
+//            if (k == 'input') {
+//              print('$topic old $k ${oldState[k]}');
+//              print('$topic new $k ${newState[k]}');
+//            }
           }
         });
         retain = save;
@@ -155,7 +159,11 @@ abstract class HostBase extends StatefulEmitter {
       debug('getSetting: no MONGODB_HOST');
       host = 'nuc1';
     }
-    host = 'mongodb://${host}:27017/settings';
+    if (host.contains('mongodb:')) {
+      host += ':27017/settings';
+    } else {
+      host = 'mongodb://${host}:27017/settings';
+    }
     final db = Db(host);
     await db.open();
     final collection = await db.collection('config');

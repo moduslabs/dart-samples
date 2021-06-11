@@ -23,3 +23,10 @@ services:
       build:
         context: .
         dockerfile: weather-microservice/Dockerfile
+
+    bravia:
+      image: dart-testing/bravia-microservice
+      build:
+        context: .
+        dockerfile: bravia-microservice/Dockerfile
+

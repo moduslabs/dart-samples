@@ -97,15 +97,11 @@ Future<int> main() async {
   print('Platform ${Platform.isLinux} ${Platform.isWindows}');
   await MQTT.connect();
   var config = await HostBase.getSetting('config') ?? {};
+  print('config $config');
   debug('Config ${config["presence"]}');
   for (var person in config['presence']) {
     hosts.add(PresenceHost(person));
   }
-
-  /// Ok, lets try a subscription
-  // const topic = 'hubitat/Back Room Light/status/switch'; // Not a wildcard topic
-  // debug('Subscribing to $topic topic $onMessage');
-  // MQTT.subscribe(topic, onMessage);
 
  for(;;) {
     await HostBase.sleep(120);
