@@ -31,7 +31,7 @@ class ServiceProtocol {
         return _methods;
       }
     }
-    
+
     var versions = await getVersions();
     var index = 0;
     // local next function
@@ -43,7 +43,7 @@ class ServiceProtocol {
       if (index < versions.length) {
         final result = await invoke('getMethodTypes',
             version: '1.0', params: versions[index++]);
-        
+
         next(result);
       } else if (version != null && _methods.length > 0) {
         return _methods.firstWhere((method) => method['version'] == version);
@@ -59,7 +59,10 @@ class ServiceProtocol {
     params = params != null ? [params] : [];
     final Map<String, dynamic> response = await _bravia.request(_protocol,
         {'id': 3, 'method': method, 'version': version, 'params': params});
-    
+    if (response['error'] != null) {
+      debug('$method response $response ${response["error"]}');
+      return response;
+    }
     return response['result'];
   }
 }
@@ -87,6 +90,9 @@ class Bravia extends StatefulEmitter {
   /// Constructor takes IP address or hostname argument
   Bravia(String host,
       {int port = 80, String psk = '0000', int timeout = 5000}) {
+    if (!host.contains('.')) {
+      host += '.';
+    }
     _host = host;
     _port = port;
     _psk = psk;
@@ -125,11 +131,10 @@ class Bravia extends StatefulEmitter {
   Future<List<dynamic>> getIRCCCodes() async {
     final result = await system.invoke('getRemoteControllerInfo');
     _codes = result[1];
-    print('codes ${_codes.length}');
-    for (var i=0; i<_codes.length; i++) {
-      final code = _codes[i];
-      print('code: ${code} ${code["name"]}');
-    }
+//    for (var i=0; i<_codes.length; i++) {
+//      final code = _codes[i];
+//      print('code: ${code} ${code["name"]}');
+//    }
     return _codes;
   }
 }

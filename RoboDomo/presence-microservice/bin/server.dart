@@ -97,6 +97,7 @@ Future<int> main() async {
   print('Platform ${Platform.isLinux} ${Platform.isWindows}');
   await MQTT.connect();
   var config = await HostBase.getSetting('config') ?? {};
+  print('config $config');
   debug('Config ${config["presence"]}');
   for (var person in config['presence']) {
     hosts.add(PresenceHost(person));

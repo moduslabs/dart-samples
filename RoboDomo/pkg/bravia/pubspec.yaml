@@ -10,7 +10,9 @@ dependencies:
   env_get: ^1.0.0
   debug: ^1.0.0
   modus_json: ^1.0.0
-  statefulemitter: ^1.0.0
+  statefulemitter: ^1.0.2
+#  statefulemitter:
+#    path: ../statefulemitter
   dio: ^4.0.0
 
 dev_dependencies:
