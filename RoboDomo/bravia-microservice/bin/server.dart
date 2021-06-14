@@ -26,14 +26,80 @@ class BraviaHost extends HostBase {
     _tv = tv;
     _host = device != null ? device : tv['device'];
     _bravia = Bravia(_host);
-    debug('BraviaHost($_host)');
+    debug('New BraviaHost($_host)');
     run();
+  }
+
+  bool _running = false;
+  Future<void> commandRunner(String command) async {
+    _commandQueue.add(command);
+    try {
+      if (state['codesMap']['POWERON'] != null || _running) {
+        return;
+      }
+    } catch (e) {
+      return;
+    }
+    _running = true;
+    while (_running) {
+      while (_commandQueue.length > 0) {
+        final cmd = _commandQueue.removeAt(0);
+        final mapped = state['codesMap'][cmd];
+      }
+      HostBase.usleep(500);
+    }
   }
 
   @override
   Future<void> command(cmd, arg) async {
-    // presence supports no commands other than restart, which is handled
-    // by HostBase
+    cmd = cmd.toUpperCase();
+    debug('command $cmd($arg)');
+    if (cmd.startsWith('LAUNCH-')) {
+      await this.launchApplication(cmd.substring(7));
+    } else if (cmd == 'SPEAKERS') {
+      try {
+        await _bravia.audio.invoke('setSoundSettintgs', params: [
+          {
+            "settings": [
+              {"value": 'speaker', "target": 'outputTerminal'}
+            ]
+          }
+        ]);
+      } catch (e) {
+        print('command exception $e');
+      }
+    } else if (cmd == 'AUDIOSYSTEM') {
+      try {
+        await _bravia.audio.invoke('setSoundSettintgs', params: [
+          {
+            "settings": [
+              {"value": 'audioSystem', "target": 'outputTerminal'}
+            ]
+          }
+        ]);
+      } catch (e) {
+        print('command exception $e');
+      }
+    } else if (cmd == 'POWERON') {
+      commandRunner('WakeUp');
+    }
+    final mapped = state['codesMap'][cmd];
+    switch (mangle(mapped)) {
+      case 'HDMI1':
+        this.state = {'input': 'HDMI 1'};
+        break;
+      case 'HDMI2':
+        this.state = {'input': 'HDMI 2'};
+        break;
+      case 'HDMI3':
+      case 'HDMI3(EARC)':
+        this.state = {'input': 'HDMI 3'};
+        break;
+      case 'HDMI4':
+        this.state = {'input': 'HDMI 4'};
+        break;
+    }
+    commandRunner(mapped);
   }
 
   pollCodes() async {
@@ -67,7 +133,7 @@ class BraviaHost extends HostBase {
 
   pollPower() async {
     final power = await _bravia.system.invoke('getPowerStatus');
-    state = { "power": power[0]['status'] == 'active'};
+    state = {"power": power[0]['status'] == 'active'};
   }
 
   pollInput() async {
@@ -102,7 +168,7 @@ class BraviaHost extends HostBase {
     return _apps["appsMap"];
   }
 
-  void launchApplication(String title) async {
+  Future<void>  launchApplication(String title) async {
     await pollApplicationList();
     title = title.toLowerCase();
     final app = state['appsMap'];

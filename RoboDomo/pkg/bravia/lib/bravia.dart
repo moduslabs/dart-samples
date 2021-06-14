@@ -8,21 +8,44 @@ import 'dart:io';
 
 final debug = Debug('Bravia');
 
+String mangle(String s) {
+  return s.replaceAll(' ', '').toUpperCase();
+}
+
 class ServiceProtocol {
   late final Bravia _bravia;
   late final String _protocol;
   final List<dynamic> _methods = [];
 
+  ///
+  /// ServiceProtocol
+  ///
+  /// A ServiceProtocol is just an endpoint/URL for accessing a specific service
+  /// in the TV API.
+  ///
+  /// For example, 'accessControl' URL is http://tv_IP/sony/accessControl.
+  ///
   ServiceProtocol(Bravia bravia, String protocol) {
     _bravia = bravia;
     _protocol = protocol;
   }
 
+  ///
+  /// final versions = getVersions();
+  ///
+  /// Returns an array of versions supported by the API, something like ['1.0', '1.1']
+  ///
   getVersions() async {
     final versions = await invoke('getVersions');
     return versions[0];
   }
 
+  ///
+  /// getMethodTypes(version);
+  ///
+  /// Each endpoint (and version) has its own distinct methods that can be invoked.  This
+  /// method returns a List of method information.
+  ///
   getMethodTypes(String? version) async {
     if (_methods.length > 0) {
       if (version != null) {
@@ -55,6 +78,12 @@ class ServiceProtocol {
     next(null);
   }
 
+  ///
+  /// invoke(method, version <optional params>);
+  ///
+  /// Invoke method on the ServiceProtocol URL sending optional params.
+  /// The version parameter selects the Sony Bravia TV's API version.
+  ///
   invoke(String method, {String version = '1.0', dynamic params}) async {
     params = params != null ? [params] : [];
     final Map<String, dynamic> response = await _bravia.request(_protocol,
@@ -67,6 +96,11 @@ class ServiceProtocol {
   }
 }
 
+///
+/// Bravia class.
+///
+/// You can instantiate one of these for each TV to be monitored/controlled.
+///
 class Bravia extends StatefulEmitter {
   late final String _host, _psk;
   late final _port;
@@ -87,7 +121,9 @@ class Bravia extends StatefulEmitter {
   late final ServiceProtocol system;
   late final ServiceProtocol videoScreen;
 
+  ///
   /// Constructor takes IP address or hostname argument
+  ///
   Bravia(String host,
       {int port = 80, String psk = '0000', int timeout = 5000}) {
     if (!host.contains('.')) {
@@ -114,27 +150,57 @@ class Bravia extends StatefulEmitter {
     videoScreen = ServiceProtocol(this, 'videoScreen');
   }
 
+  ///
+  /// Object o = request(path, json);
+  ///
+  /// Send request to path with JSON as post data.  Return JSON parsed result.
+  ///
   Future<Map<String, dynamic>> request(String path, dynamic json) async {
-    // debug('$_host request $path JSON($json) $_url/$path');
     var dio = Dio();
     dio.options.headers['Content-Type'] = 'text/xml; charset=UTF-8';
     dio.options.headers['SOAPACTION'] =
         '"urn:schemas-sony-com:service:IRCC:1#X_SendIRCC"';
     dio.options.headers['X-Auth-PSK'] = _psk;
-    // dio.options.connectTimeout = TIMEOUT;
     final response = await dio.post('$_url/$path', data: JSON.stringify(json));
-    // debug('$_host response $response ${response.data.runtimeType}');
 
     return response.data;
   }
 
+  ///
+  /// List codes = getIRCCCodes();
+  ///
+  /// Returns a list of IRCC codes supported by the TV.  IRCC codes are what a remote control (for the TV) app would
+  /// send when a button (play, pause, volume up...) is pressed.
+  ///
   Future<List<dynamic>> getIRCCCodes() async {
-    final result = await system.invoke('getRemoteControllerInfo');
-    _codes = result[1];
-//    for (var i=0; i<_codes.length; i++) {
-//      final code = _codes[i];
-//      print('code: ${code} ${code["name"]}');
-//    }
+    if (_codes.length <= 0) {
+      final result = await system.invoke('getRemoteControllerInfo');
+      _codes = result[1];
+    }
     return _codes;
+  }
+
+  ///
+  /// send(code);
+  ///
+  /// Send IRCC code to TV.  IRCC code is for a remote control button (like play/pause/etc.)
+  ///
+  Future<void> send(String code) async {
+    final codes = await getIRCCCodes();
+    final ircc = codes.firstWhere((c) => mangle(c['name']) == mangle(code));
+    if (ircc == null) {
+      print('IRCC code $code unknown');
+      return;
+    }
+    final body = '''<?xml version="1.0"?>
+          <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+              <s:Body>
+                  <u:X_SendIRCC xmlns:u="urn:schemas-sony-com:service:IRCC:1">
+                      <IRCCCode>$ircc</IRCCCode>
+                  </u:X_SendIRCC>
+              </s:Body>
+          </s:Envelope>''';
+
+    await request('/IRCC', body);
   }
 }
