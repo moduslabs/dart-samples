@@ -30,6 +30,7 @@ class Samsung extends StatefulEmitter {
   late final String _macAddress;
   late final String _powerKey;
   final powerPort = 9110; // known open ports 9110, 9119, 9197
+  late int _timeout;
   ///
   String? token;
   late final String _controlUrl;
@@ -44,6 +45,7 @@ class Samsung extends StatefulEmitter {
     _tvHostname = config['device'];
     _macAddress = config['macAddress'];
     _powerKey = config['powerKey'] ?? 'KEY_POWER';
+    _timeout = config['timeout'] ?? 4000;
     _controlUrl =
         'ws://$_tvHostname:8001/api/v2/channels/samsung.remote.control?name=$_appName_base64';
   }
@@ -101,7 +103,7 @@ class Samsung extends StatefulEmitter {
   Future<bool> getPowerState() async {
     try {
       final url = 'http://$_tvHostname:$powerPort';
-      BaseOptions options = new BaseOptions(connectTimeout: 2000);
+      BaseOptions options = new BaseOptions(connectTimeout: _timeout);
       final dio = Dio(options);
       final Response response = await dio.get(url);
       return true;
