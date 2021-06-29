@@ -7,6 +7,7 @@
 // @dart=2.12
 
 import 'dart:io';
+import 'dart:io' show Platform;
 import 'package:samsung/samsung.dart';
 import 'package:debug/debug.dart';
 import 'package:hostbase/hostbase.dart';
@@ -26,6 +27,7 @@ class SamsungHost extends HostBase {
       : super(MQTT_HOST, 'samsung/${config["device"]}', false) {
     _samsung = Samsung(config);
     _input = config['input'];
+    debug('SamsungHost constructor $config');
     run();
   }
 
