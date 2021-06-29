@@ -168,7 +168,7 @@ class BraviaHost extends HostBase {
     return _apps["appsMap"];
   }
 
-  Future<void>  launchApplication(String title) async {
+  Future<void> launchApplication(String title) async {
     await pollApplicationList();
     title = title.toLowerCase();
     final app = state['appsMap'];
@@ -193,7 +193,7 @@ class BraviaHost extends HostBase {
   Future<Never> run() async {
     var lastVolume = null;
 
-    while (true) {
+    for (;;) {
       try {
         await pollSpeakers();
         await pollCodes();

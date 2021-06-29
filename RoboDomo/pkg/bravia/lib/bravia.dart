@@ -6,8 +6,6 @@ import 'package:modus_json/modus_json.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
 
-final debug = Debug('Bravia');
-
 String mangle(String s) {
   return s.replaceAll(' ', '').toUpperCase();
 }
@@ -16,6 +14,8 @@ class ServiceProtocol {
   late final Bravia _bravia;
   late final String _protocol;
   final List<dynamic> _methods = [];
+
+  final debug = Debug('Bravia');
 
   ///
   /// ServiceProtocol
