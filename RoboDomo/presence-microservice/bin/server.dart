@@ -31,12 +31,15 @@ class PresenceHost extends HostBase {
   Future<Never> run() async {
     for (;;) {
       // debug('poll $device');
-      final Map<String, dynamic>s = {};
+      final Map<String, dynamic> s = {};
       try {
         var dio = Dio();
         dio.options.connectTimeout = TIMEOUT;
         final response = await dio.get('https://$device.');
         debug('response $response');
+      } on DioError catch (e) {
+        print('DioError, $e');
+        
       } catch (e) {
         if (e is String ||
             (e is DioError && e.type == DioErrorType.connectTimeout)) {
@@ -103,7 +106,7 @@ Future<int> main() async {
     hosts.add(PresenceHost(person));
   }
 
- for(;;) {
+  for (;;) {
     await HostBase.sleep(120);
   }
 }
