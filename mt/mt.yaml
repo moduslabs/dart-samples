@@ -1,0 +1,7 @@
+program: mt
+entrypoint: bin/mt.dart
+type: "tool"
+production: "compile"
+ignore:
+  - .git
+  - .dart_tool
