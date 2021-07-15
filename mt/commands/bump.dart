@@ -1,55 +1,36 @@
 import 'dart:io';
-import 'dart:convert';
-import 'package:args/args.dart';
-import 'package:args/command_runner.dart';
-import 'package:yaml/yaml.dart';
-import 'package:path/path.dart' as p;
+/*import 'package:yaml/yaml.dart';*/
 import 'package:version/version.dart';
-import 'package:mt/MTCommand.dart';
-import 'package:mt/pubspec.dart';
+import 'package:mt/mtcommand.dart';
+import 'package:mt/pubspec_yaml.dart';
 import 'package:mt/changelog.dart';
 import 'package:mt/packages.dart';
 import 'package:mt/editor.dart';
 
-class BumpCommand extends Command {
+class BumpCommand extends MTCommand {
   final name = 'bump';
   final description = 'bump version numbers';
-  late final _mt_yaml;
-  final _spaces = '                                  ';
-  late final pubspec;
 
-  BumpCommand(mt_yaml) {
-    _mt_yaml = mt_yaml;
-    argParser.addFlag('recurse', abbr: 'r');
+  BumpCommand() {
     argParser.addOption('type',
         abbr: 't',
-        allowed: ['major', 'minor', 'point', 'suffix'],
-        defaultsTo: 'point');
-    argParser.addOption(
-      'message',
-      abbr: 'm',
-    );
-    argParser.addOption('fix', abbr: 'f');
-    pubspec = Pubspec('pubspec.yaml');
+        allowed: ['major', 'minor', 'patch', 'prerelease'],
+        defaultsTo: 'patch');
+    argParser.addOption('message',
+        abbr: 'm', help: 'Message to add to CHANGELOG and for git commit');
+    argParser.addFlag('fix',
+        abbr: 'f',
+        defaultsTo: false,
+        help:
+            'Update monorepo packages that refer to this (mt.yaml type package only)');
+    argParser.addFlag('commit',
+        abbr: 'c',
+        defaultsTo: false,
+        help: 'Perform git commit, using message');
   }
 
-  _dumpYaml(YamlMap yaml, indent) {
-    final spaces = indent > 0 ? _spaces.substring(0, indent * 2) : '';
-    for (final key in yaml.keys) {
-      final value = yaml[key];
-      if (value is String) {
-        print('$spaces$key: $value');
-      } else {
-        print('$spaces$key:');
-        _dumpYaml(value, indent + 1);
-      }
-    }
-  }
-
-  Future<String> _bumpVersion(String type) async {
-    final packages = Packages();
-    Changelog changelog = Changelog('CHANGELOG.md');
-    var newVersion = Version.parse(pubspec.version);
+  Future<String> _bumpVersion(String version, String type) async {
+    var newVersion = Version.parse(version);
     switch (type) {
       case 'major':
         newVersion = newVersion.incrementMajor();
@@ -64,49 +45,7 @@ class BumpCommand extends Command {
         newVersion = newVersion.incrementPreRelease();
         break;
     }
-    pubspec.version = newVersion.toString();
-
-    pubspec.write('foo');
-    changelog.write('foo2');
-    return pubspec.version;
-
-    // File file = File(pubspec);
-    // if (file.existsSync()) {
-    //   print('found $pubspec');
-    //   final lines = await file.readAsLines();
-    //   print('lines ${lines.runtimeType}');
-    //   for (final line in lines) {
-    //     print('line ($line)');
-    //   }
-    //   print('${lines.join("\n")}');
-    //   final doc = loadYaml(lines.join('\n'));
-    //   final versionString = doc['version'];
-    //   if (versionString == null) {
-    //     return '';
-    //   }
-
-    //   var ver = Version.parse(versionString);
-    //   print('ver $type $ver');
-    //   switch (type) {
-    //     case 'major':
-    //       ver = ver.incrementMajor();
-    //       break;
-    //     case 'minor':
-    //       ver = ver.incrementMinor();
-    //       break;
-    //     case 'point':
-    //       ver = ver.incrementPatch();
-    //       break;
-    //     case 'suffix':
-    //       ver = ver.incrementPreRelease();
-    //       break;
-    //   }
-    //   print('ver $ver');
-    //   return ver.toString();
-
-    // } else {
-    //   return '';
-    // }
+    return newVersion.toString();
   }
 
   /*
@@ -128,15 +67,58 @@ class BumpCommand extends Command {
 
   @override
   Future<void> run() async {
+    bool dryRun = false;
+    if (globalResults?["verbose"]) {
+      if (globalResults?['dry-run']) {
+        print("*** Dry Run - no files will be changed\n");
+        dryRun = true;
+      }
+      mt_yaml.dump();
+      print('');
+    }
     final type = argResults?['type'] ?? 'patch';
     var message = argResults?['message'] ?? [];
-    if (message.length<1) {
+    if (message.length < 1) {
       message = await Editor().edit();
     }
-    print('message($message)');
+
+    if (message.length < 1) {
+      print('*** Aborted - no changelog/commit message');
+      exit(1);
+    }
+
+    // bump version in pubspec.yaml
+    final pubspec = Pubspec('.');
     final oldVersion = pubspec.version;
-    final newVersion = await _bumpVersion(type);
-    print('Updated $type version from $oldVersion to $newVersion');
+    final newVersion = await _bumpVersion(oldVersion, type);
+    pubspec.version = newVersion;
+
+    // bump version in changelog (add message and version heading)
+    Changelog changelog = Changelog('.');
+    changelog.addVersion(newVersion, message);
+
+    if (dryRun) {
+      pubspec.dump();
+      print('');
+      changelog.dump();
+    } else {
+      pubspec.write('foo');
+      changelog.write('foo2');
+    }
+
+    final packages = Packages();
+    packages.updateReferences(pubspec.name, newVersion);
+    if (!dryRun) {
+      packages.write();
+    }
+
+    if (dryRun) {
+      print(
+          '\nUpdated ${pubspec.name}:  $type version from $oldVersion to $newVersion (DRY RUN)\n');
+    } else {
+      print(
+          '\nUpdated ${pubspec.name}:  $type version from $oldVersion to $newVersion\n');
+    }
     // recurse(rest[0]);
   }
 }

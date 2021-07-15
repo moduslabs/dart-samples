@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:path/path.dart' as p;
-import 'package:mt/pubspec.dart';
+import 'package:mt/pubspec_yaml.dart';
 import 'package:mt/changelog.dart';
 
 class Package {
@@ -8,6 +8,7 @@ class Package {
   late final _changelog;
   late final _packageDir;
   late final _name;
+  bool _modified = false;
 
   Package(String packageDir) {
     _packageDir = packageDir;
@@ -15,6 +16,11 @@ class Package {
     _pubspec = Pubspec(packageDir);
     _changelog = Changelog(packageDir);
     // dump();
+  }
+
+  void updateReference(String package, String version) {
+    print('updateReference package($_name) dependency($package) => $version ');
+    _modified = true;
   }
 
   void dump() {
@@ -28,6 +34,11 @@ class Package {
     // _changelog.dump();
   }
 
+  void write() {
+    if (_modified) {
+      print('write package $_name');
+    }
+  }
 }
 
 class Packages {
@@ -96,5 +107,19 @@ class Packages {
   Packages() {
     // print('Packages Constructor ${Directory.current}');
     _findPackages();
+    print('packageDir $_packageDir');
+  }
+
+  void updateReferences(String packageName, String version) {
+    print('Packages updateReferences dependency($packageName) => $version ');
+    for (final package in _packages) {
+      package.updateReference(packageName, version);
+    }
+  }
+
+  void write() {
+    for (final package in _packages) {
+      package.write();
+    }
   }
 }

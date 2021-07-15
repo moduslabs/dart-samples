@@ -1,4 +1,4 @@
-program: mt
+package: mt
 entrypoint: bin/mt.dart
 type: "tool"
 production: "compile"

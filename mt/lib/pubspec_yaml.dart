@@ -5,6 +5,7 @@ import 'package:yaml/yaml.dart';
 class Pubspec {
   late final _lines;
   var _doc;
+  var _yaml;
 
   late final _path;
   late final _name;
@@ -12,6 +13,7 @@ class Pubspec {
   Pubspec(String path) {
     _path = path;
     _name = p.basename(path);
+
     File file = File('$path/pubspec.yaml');
     if (!file.existsSync()) {
       _lines = [
@@ -31,8 +33,8 @@ class Pubspec {
     } else {
       _lines = file.readAsLinesSync();
     }
-    final yaml = loadYaml(_lines.join('\n')) as Map;
-    _doc = Map.from(yaml);
+    _yaml = loadYaml(_lines.join('\n')); //  as Map;
+    _doc = Map.from(_yaml);
   }
 
   void set version(String ver) {
@@ -45,8 +47,7 @@ class Pubspec {
     }
     if (_lines.length == 0) {
       _lines.insert(0, 'version: $ver');
-    }
-    else {
+    } else {
       _lines.insert(1, 'version: $ver');
     }
   }
@@ -63,12 +64,20 @@ class Pubspec {
     return _doc['description'];
   }
 
+  Map get doc {
+    return _doc;
+  }
+
+  YamlMap get yaml {
+    return _yaml;
+  }
+
   void dump() {
     print('================================================================');
     print('==== pubspec.yaml');
     print('================================================================');
-    print(_lines.join('\n'));
-    print('================================================================');
+    print('  ' + _lines.join('\n  '));
+    print('');
   }
 
   void write(String filename) {

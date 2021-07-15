@@ -1,0 +1,7 @@
+package: dart-samples
+#entrypoint: bin/mt.dart
+type: "repoo"
+ignore:
+  - .git
+  - .dart_tool
+  - .idea
